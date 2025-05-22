@@ -1,7 +1,7 @@
 from typing import Dict
 from copy import deepcopy
 import random
-from config import PAYOUT_RATES, WINNING_STRUCTURES, STD_THRESHOLD, CONFIDENCE_LEVEL, MINIMUM_BET_THRESHOLD
+from config import PAYOUT_RATES, WINNING_STRUCTURES, STD_THRESHOLD, CONFIDENCE_LEVEL, MINIMUM_BET_THRESHOLD, TARGET_RTP
 from player_stats import PlayerStats, calculate_weighted_std
 from scipy.stats import norm
 
@@ -17,7 +17,9 @@ def compute_dynamic_std_confidence_interval(base_std: float, confidence: float, 
 
 def evaluate_outcomes(
     current_players: Dict[str, PlayerStats],
-    current_bets: Dict[str, Dict[int, float]]
+    current_bets: Dict[str, Dict[int, float]],
+    confidence_level: float = CONFIDENCE_LEVEL,
+    target_rtp: float = TARGET_RTP
 ) -> Dict:
     global std_history
 
@@ -27,7 +29,7 @@ def evaluate_outcomes(
         for pid, bets in current_bets.items()
         if sum(bets.values()) >= MINIMUM_BET_THRESHOLD
     ]    
-    rtp_std_low, rtp_std_high = compute_dynamic_std_confidence_interval(BASE_STD, CONFIDENCE_LEVEL, len(eligible_players))
+    rtp_std_low, rtp_std_high = compute_dynamic_std_confidence_interval(BASE_STD, confidence_level, len(eligible_players))
 
     results = []
     std_analysis_data = []

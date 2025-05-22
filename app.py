@@ -77,8 +77,16 @@ st.sidebar.text(f"对局数ID：{st.session_state.round_id}")
 st.sidebar.text(f"在线人数：{online_count}")
 st.sidebar.text(f"参与人数：{betting_players}")
 st.sidebar.markdown("### 🎯 策略信息")
-st.sidebar.text("目标 RTP：98%")
-st.sidebar.text("置信度：95%")
+if "target_rtp" not in st.session_state:
+    from config import TARGET_RTP
+    st.session_state.target_rtp = TARGET_RTP
+if "confidence_level" not in st.session_state:
+    from config import CONFIDENCE_LEVEL
+    st.session_state.confidence_level = CONFIDENCE_LEVEL
+
+st.session_state.target_rtp = st.sidebar.number_input("🎯 目标 RTP", min_value=0.80, max_value=1.20, step=0.001, format="%.3f", value=st.session_state.target_rtp)
+st.session_state.confidence_level = st.sidebar.slider("📐 置信度", min_value=0.80, max_value=0.999, step=0.001, format="%.3f", value=st.session_state.confidence_level)
+
 if 'sidebar_ci' in st.session_state:
     st.sidebar.text(st.session_state.sidebar_ci)
 
@@ -141,7 +149,12 @@ with left_col:
     if st.session_state.final_outcome:
         highlight_areas = set(st.session_state.final_outcome["winning_areas"])
     elif st.session_state.time_to_next_round > 20 and st.session_state.current_bets and st.session_state.structure_result_cache is None and st.session_state.countdown_bet == 29:
-        preview = evaluate_outcomes(st.session_state.player_pool, st.session_state.current_bets)
+        preview = evaluate_outcomes(
+    st.session_state.player_pool,
+    st.session_state.current_bets,
+    confidence_level=st.session_state.confidence_level,
+    target_rtp=st.session_state.target_rtp
+)
         st.session_state.structure_result_cache = preview
         highlight_areas = set()
         for r in preview["all_structures"]:
@@ -325,7 +338,12 @@ if st.session_state.running:
         if st.session_state.forced_outcome:
             st.session_state.final_outcome = st.session_state.forced_outcome
         else:
-            st.session_state.final_outcome = evaluate_outcomes(st.session_state.player_pool, st.session_state.current_bets)
+            st.session_state.final_outcome = evaluate_outcomes(
+    st.session_state.player_pool,
+    st.session_state.current_bets,
+    confidence_level=st.session_state.confidence_level,
+    target_rtp=st.session_state.target_rtp
+)
 
     elif st.session_state.time_to_next_round == 0:
         # ✅ 结算每位玩家的返还和投注
