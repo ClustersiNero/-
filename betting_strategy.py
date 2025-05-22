@@ -10,7 +10,7 @@ def generate_bets(player_ids):
 
     current_bets = {}
     for pid in active_players:
-        area_count = random.choices(range(3, 9), weights=[6, 5, 4, 3, 2, 1], k=1)[0]
+        area_count = random.choices(range(0, 9), weights=[20, 9, 8, 7, 6, 5, 4, 3, 2, 1], k=1)[0]
         selected = random.sample(AREAS, area_count)
         total_amount = random.randint(200, 1200)
         weights = [1 / PAYOUT_RATES[a] for a in selected]
