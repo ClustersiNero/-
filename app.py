@@ -1,5 +1,28 @@
 import streamlit as st
-st.set_page_config(layout="wide")
+import hashlib
+st.set_page_config(page_title="百人游戏仪表盘_摩天轮", layout="wide")
+
+def check_password():
+    def _hash(password):
+        return hashlib.sha256(password.encode()).hexdigest()
+
+    if "auth_ok" not in st.session_state:
+        st.session_state.auth_ok = False
+
+    correct_hash = _hash("ferris123")
+    with st.sidebar:
+        st.markdown("### 🔐 请输入访问密码")
+        password_input = st.text_input("Password", type="password")
+        if st.button("登录"):
+            if _hash(password_input) == correct_hash:
+                st.session_state.auth_ok = True
+            else:
+                st.error("❌ 密码错误，请重试。")
+
+    return st.session_state.auth_ok
+
+if not check_password():
+    st.stop()
 import pandas as pd
 import time, random
 from betting_strategy import generate_bets
